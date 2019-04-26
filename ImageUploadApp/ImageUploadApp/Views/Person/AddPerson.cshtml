@@ -1,0 +1,133 @@
+﻿
+@{
+    ViewBag.Title = "AddPerson";
+    //Layout = "~/Views/Shared/_Layout.cshtml";
+    Layout = null;
+}
+<link href="~/Content/bootstrap.min.css" rel="stylesheet" />
+<div class="container">
+    <h2 align="center">IMAGE UPLOADING AREA</h2>
+    @using (Ajax.BeginForm("AddPerson", null, new AjaxOptions {HttpMethod = "POST"}, new {enctype = "multipart/form-data", id = "personInfoForm"}))
+    {
+        @Html.AntiForgeryToken()
+        @Html.ValidationSummary(true, "", new {@class = "text-danger"})
+        <div class="form-group">
+            <label>NAME</label>
+            <div class="col-md-10">
+                <input name="PersonName" id="PersonName" class="form-control" type="text"/>
+            </div>
+        </div>
+        <div class="form-group">
+            <label>E-MAIL</label>
+            <div class="col-md-10">
+                <input type="text" id="PersonEmail" name="PersonEmail" class="form-control"/>
+            </div>
+        </div>
+        <div class="form-group">
+            <label>MOBILE</label>
+            <div class="col-md-10">
+                <input type="text" id="PersonMobile" name="PersonMobile" class="form-control"/>
+            </div>
+        </div>
+        <div class="form-group">
+            <div class="col-md-10">
+                <input type="file" name="personPhoto" id="personPhoto" class="form-control"/>
+                <img src="" class="img-circle" id="imgPreview">
+                <div class="img-thumbnail" id="append_img"></div>
+                <input type="Hidden" id="PersonPhoto" value=""/>
+            </div>
+        </div>
+        <div class="form-group">
+            <div class="col-md-offset-2 col-md-10">
+                <input type="button" value="Create" class="btn btn-default" id="personAdd"/>
+            </div>
+            <label id="msg"></label>
+        </div>
+    }
+</div>
+<script src="~/Scripts/jquery-3.2.1.min.js"></script>
+<script src="~/Scripts/bootstrap.min.js"></script>
+<script>
+    $(document).ready(function () {
+        $('#personPhoto').change(function () {
+            var form = $("#personInfoForm");
+            var formdata = new FormData(form[0]);
+            var formAction = form.attr('action');
+
+            $.ajax({
+                url: '@Url.Action("Upload", "Person")',
+                type: 'POST',
+                data: formdata ? formdata : form.serialize(),
+                cache: false,
+                contentType: false,
+                processData: false,
+                success: function (file) {
+                    $("#fileProgress").hide();
+                    $("#PersonPhoto").val(file.name);
+                    $("#append_img").append('<img id="user_img_path" src="../Images/' +
+                        file.name +
+                        '" width="100" height="100"/>');
+                },
+                xhr: function () {
+                    var fileXhr = $.ajaxSettings.xhr();
+                    if (fileXhr.upload) {
+                        $("progress").show();
+                        fileXhr.upload.addEventListener("progress",
+                            function (e) {
+                                if (e.lengthComputable) {
+                                    $("#fileProgress").attr({
+                                        value: e.loaded,
+                                        max: e.total
+                                    });
+                                }
+                            },
+                            false);
+                    }
+                    return fileXhr;
+                }
+            });
+        });
+    });
+</script>
+<script>
+    $(document).ready(function () {
+        $("#personAdd").on('click', function (e) {
+            e.preventDefault();
+            var personDetails = {};
+            personDetails.PersonName = $("#PersonName").val();
+            personDetails.PersonEmail = $("#PersonEmail").val();
+            personDetails.PersonMobile = $("#PersonMobile").val();
+            personDetails.PersonPhoto = $("#PersonPhoto").val();
+            var jsonData = JSON.stringify({
+                personModels: personDetails
+            });
+            console.log(jsonData);
+            $.ajax({
+                type: "POST",
+                url: '@Url.Action("AddPerson","Person")',
+                data: jsonData,
+                contentType: "application/json; charset=utf-8",
+                dataType: "json",
+                success: OnSuccess,
+                error: OnErrorCall
+            });
+            function OnSuccess(response) {
+                var result = response.d;
+                if (result == result) {
+                    $("#msg").html("New user addded successfully").css("color", "green");
+                }
+                $("#PersonName").val("");
+                $("#PersonEmail").val("");
+                $("#PersonMobile").val("");
+                $("#personPhoto").val("");
+                $("#user_img_path").val("");
+            }
+            function OnErrorCall(response) {
+                $("#msg").html("Error occurs  :(").css("color", "red");
+            }
+        });
+
+    });
+
+</script>
+

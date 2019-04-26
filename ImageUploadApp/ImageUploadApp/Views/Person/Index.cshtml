@@ -1,0 +1,52 @@
+﻿@model IEnumerable<ImageUploadApp.Models.PersonModels>
+
+@{
+    ViewBag.Title = "Index";
+    Layout = "~/Views/Shared/_Layout.cshtml";
+}
+
+<h2>Index</h2>
+
+<p>
+    @Html.ActionLink("Create New", "AddPerson")
+</p>
+<table class="table">
+    <tr>
+        <th>
+            @Html.DisplayNameFor(model => model.PersonName)
+        </th>
+        <th>
+            @Html.DisplayNameFor(model => model.PersonEmail)
+        </th>
+        <th>
+            @Html.DisplayNameFor(model => model.PersonMobile)
+        </th>
+        <th>
+            @Html.DisplayNameFor(model => model.PersonPhoto)
+        </th>
+        <th></th>
+    </tr>
+
+@foreach (var item in Model) {
+    <tr>
+        <td>
+            @Html.DisplayFor(modelItem => item.PersonName)
+        </td>
+        <td>
+            @Html.DisplayFor(modelItem => item.PersonEmail)
+        </td>
+        <td>
+            @Html.DisplayFor(modelItem => item.PersonMobile)
+        </td>
+        <td>
+            <img src="~/Images/@item.PersonPhoto" width="100" height="100"/>
+        </td>
+        <td>
+            @Html.ActionLink("Edit", "Edit", new { id=item.PersonId }) |
+            @Html.ActionLink("Details", "Details", new { id=item.PersonId }) |
+            @Html.ActionLink("Delete", "Delete", new { id=item.PersonId })
+        </td>
+    </tr>
+}
+
+</table>
